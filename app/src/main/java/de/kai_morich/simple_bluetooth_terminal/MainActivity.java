@@ -9,12 +9,14 @@ public class MainActivity extends AppCompatActivity implements FragmentManager.O
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        // 메인 시작
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         getSupportFragmentManager().addOnBackStackChangedListener(this);
         if (savedInstanceState == null)
+            // 1.이건잘모름 아마도 앱최초실행일때 savedInstanceState 일거같음
             getSupportFragmentManager().beginTransaction().add(R.id.fragment, new DevicesFragment(), "devices").commit();
         else
             onBackStackChanged();

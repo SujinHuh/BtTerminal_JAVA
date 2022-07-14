@@ -53,6 +53,7 @@ public class TerminalFragment extends Fragment implements ServiceConnection, Ser
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
         setRetainInstance(true);
+        //6. device라는 파라미터를 꺼내서 저장
         deviceAddress = getArguments().getString("device");
     }
 
@@ -178,6 +179,7 @@ public class TerminalFragment extends Fragment implements ServiceConnection, Ser
      * Serial + UI
      */
     private void connect() {
+        // 6. 전달받은 주소로 커넥션연결
         try {
             BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
             BluetoothDevice device = bluetoothAdapter.getRemoteDevice(deviceAddress);
@@ -223,6 +225,7 @@ public class TerminalFragment extends Fragment implements ServiceConnection, Ser
     }
 
     private void receive(byte[] data) {
+        //7. 최종 데이터 받는 ,데이터 바이트 스트링 치환후, 제이슨 파싱,
         if(hexEnabled) {
             receiveText.append(TextUtil.toHexString(data) + '\n');
         } else {
@@ -238,7 +241,15 @@ public class TerminalFragment extends Fragment implements ServiceConnection, Ser
                 }
                 pendingNewline = msg.charAt(msg.length() - 1) == '\r';
             }
-            receiveText.append(TextUtil.toCaretString(msg, newline.length() != 0));
+            receiveText.append("111" + TextUtil.toCaretString(msg, newline.length() != 0));
+            // 여기서그냥 계속 어펜드하고
+
+
+            // 파일저장을 밑에다가 저 스트링가지구 하다가
+            // 기존파일이있으면 스트림으로 읽으다가 수정
+            // 없으면 파일새로생성
+
+// 받고
         }
     }
 
