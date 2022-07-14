@@ -32,8 +32,11 @@ public class DevicesFragment extends ListFragment {
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
         if(getActivity().getPackageManager().hasSystemFeature(PackageManager.FEATURE_BLUETOOTH))
+            // 아래어댑터는 잘모르겠고..
             bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
-        listAdapter = new ArrayAdapter<BluetoothDevice>(getActivity(), 0, listItems) {
+            // 2. listAdapter 해당 어댑터는 블루투스 목록을 가져오는 어댑터같음
+            // 3. 그래서 해당 어댑터에 블루투스 목록을 가져와 이름, 주소값을 설정해서 액티비티에 그려줌  e.x onActivityCreated
+            listAdapter = new ArrayAdapter<BluetoothDevice>(getActivity(), 0, listItems) {
             @NonNull
             @Override
             public View getView(int position, View view, @NonNull ViewGroup parent) {
@@ -58,6 +61,7 @@ public class DevicesFragment extends ListFragment {
         setEmptyText("initializing...");
         ((TextView) getListView().getEmptyView()).setTextSize(18);
         setListAdapter(listAdapter);
+        //4. onCreate에서 담긴 어댑터로 리스트화면 그려줌
     }
 
     @Override
@@ -105,11 +109,12 @@ public class DevicesFragment extends ListFragment {
 
     @Override
     public void onListItemClick(@NonNull ListView l, @NonNull View v, int position, long id) {
+        //5. 리스트 클릭시 발생하는 메소드 여기부터는 아까설명했던곳 각 객체에 이벤트바인딩 되는 부분
         BluetoothDevice device = listItems.get(position-1);
         Bundle args = new Bundle();
         args.putString("device", device.getAddress());
-        Fragment fragment = new TerminalFragment();
-        fragment.setArguments(args);
+        Fragment fragment = new TerminalFragment(); //  터미널 프레그먼트 생성
+        fragment.setArguments(args);    // 생성한 프레그먼트에 클릭을 한 블루투스의 주소를 파라미터에 담는다
         getFragmentManager().beginTransaction().replace(R.id.fragment, fragment, "terminal").addToBackStack(null).commit();
     }
 
