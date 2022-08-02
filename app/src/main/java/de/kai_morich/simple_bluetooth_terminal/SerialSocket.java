@@ -9,6 +9,8 @@ import android.content.Intent;
 import android.content.IntentFilter;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.security.InvalidParameterException;
 import java.util.Arrays;
 import java.util.UUID;
@@ -95,14 +97,17 @@ class SerialSocket implements Runnable {
         }
         connected = true;
         try {
-            byte[] buffer = new byte[1024];
+            // 여기길이에따라서 짤리는듯. 1024
+            byte[] buffer = new byte[4096];
             int len;
             //noinspection InfiniteLoopStatement
             while (true) {
                 len = socket.getInputStream().read(buffer);
                 byte[] data = Arrays.copyOf(buffer, len);
-                if(listener != null)
+                if(listener != null) {
+                    System.out.println(44);
                     listener.onSerialRead(data);
+                }
             }
         } catch (Exception e) {
             connected = false;
