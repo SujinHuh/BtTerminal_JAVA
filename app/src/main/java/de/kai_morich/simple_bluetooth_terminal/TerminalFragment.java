@@ -2,6 +2,7 @@ package de.kai_morich.simple_bluetooth_terminal;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.Application;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.content.ComponentName;
@@ -28,9 +29,13 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
+import com.google.gson.Gson;
+
+import java.util.List;
+
 public class TerminalFragment extends Fragment implements ServiceConnection, SerialListener {
 
-    private enum Connected { False, Pending, True }
+    private enum Connected {False, Pending, True}
 
     private String deviceAddress;
     private SerialService service;
@@ -48,8 +53,12 @@ public class TerminalFragment extends Fragment implements ServiceConnection, Ser
     /*
      * Lifecycle
      */
+    static long count = 0;
+    static String testTxt = "";
+
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
+        System.out.println("onCreate!!");
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
         setRetainInstance(true);
@@ -67,37 +76,46 @@ public class TerminalFragment extends Fragment implements ServiceConnection, Ser
 
     @Override
     public void onStart() {
+        System.out.println("onStart");
         super.onStart();
-        if(service != null)
+        if (service != null) {
+            System.out.println("onStart true");
             service.attach(this);
-        else
+        }else {
+            System.out.println("onStart false");
             getActivity().startService(new Intent(getActivity(), SerialService.class)); // prevents service destroy on unbind from recreated activity caused by orientation change
+        }
     }
 
     @Override
     public void onStop() {
-        if(service != null && !getActivity().isChangingConfigurations())
+        if (service != null && !getActivity().isChangingConfigurations())
             service.detach();
         super.onStop();
     }
 
-    @SuppressWarnings("deprecation") // onAttach(context) was added with API 23. onAttach(activity) works for all API versions
+    @SuppressWarnings("deprecation")
+    // onAttach(context) was added with API 23. onAttach(activity) works for all API versions
     @Override
     public void onAttach(@NonNull Activity activity) {
+        System.out.println("onAttach!!");
         super.onAttach(activity);
         getActivity().bindService(new Intent(getActivity(), SerialService.class), this, Context.BIND_AUTO_CREATE);
     }
 
     @Override
     public void onDetach() {
-        try { getActivity().unbindService(this); } catch(Exception ignored) {}
+        try {
+            getActivity().unbindService(this);
+        } catch (Exception ignored) {
+        }
         super.onDetach();
     }
 
     @Override
     public void onResume() {
         super.onResume();
-        if(initialStart && service != null) {
+        if (initialStart && service != null) {
             initialStart = false;
             getActivity().runOnUiThread(this::connect);
         }
@@ -107,7 +125,7 @@ public class TerminalFragment extends Fragment implements ServiceConnection, Ser
     public void onServiceConnected(ComponentName name, IBinder binder) {
         service = ((SerialService.SerialBinder) binder).getService();
         service.attach(this);
-        if(initialStart && isResumed()) {
+        if (initialStart && isResumed()) {
             initialStart = false;
             getActivity().runOnUiThread(this::connect);
         }
@@ -179,6 +197,7 @@ public class TerminalFragment extends Fragment implements ServiceConnection, Ser
      * Serial + UI
      */
     private void connect() {
+        System.out.println("connecting start");
         // 6. 전달받은 주소로 커넥션연결
         try {
             BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
@@ -188,6 +207,7 @@ public class TerminalFragment extends Fragment implements ServiceConnection, Ser
             SerialSocket socket = new SerialSocket(getActivity().getApplicationContext(), device);
             service.connect(socket);
         } catch (Exception e) {
+            System.out.println("connecting fail");
             onSerialConnectError(e);
         }
     }
@@ -198,14 +218,14 @@ public class TerminalFragment extends Fragment implements ServiceConnection, Ser
     }
 
     private void send(String str) {
-        if(connected != Connected.True) {
+        if (connected != Connected.True) {
             Toast.makeText(getActivity(), "not connected", Toast.LENGTH_SHORT).show();
             return;
         }
         try {
             String msg;
             byte[] data;
-            if(hexEnabled) {
+            if (hexEnabled) {
                 StringBuilder sb = new StringBuilder();
                 TextUtil.toHexString(sb, TextUtil.fromHexString(str));
                 TextUtil.toHexString(sb, newline.getBytes());
@@ -225,12 +245,13 @@ public class TerminalFragment extends Fragment implements ServiceConnection, Ser
     }
 
     private void receive(byte[] data) {
+        System.out.println("receive start !!");
         //7. 최종 데이터 받는 ,데이터 바이트 스트링 치환후, 제이슨 파싱,
-        if(hexEnabled) {
+        if (hexEnabled) {
             receiveText.append(TextUtil.toHexString(data) + '\n');
         } else {
             String msg = new String(data);
-            if(newline.equals(TextUtil.newline_crlf) && msg.length() > 0) {
+            if (newline.equals(TextUtil.newline_crlf) && msg.length() > 0) {
                 // don't show CR as ^M if directly before LF
                 msg = msg.replace(TextUtil.newline_crlf, TextUtil.newline_lf);
                 // special handling if CR and LF come in separate fragments
@@ -239,19 +260,51 @@ public class TerminalFragment extends Fragment implements ServiceConnection, Ser
                     if (edt != null && edt.length() > 1)
                         edt.replace(edt.length() - 2, edt.length(), "");
                 }
-                pendingNewline = msg.charAt(msg.length() - 1) == '\r';
+                pendingNewline = msg.charAt(msg.length() - 1) == '\n';
             }
-            receiveText.append("111" + TextUtil.toCaretString(msg, newline.length() != 0));
-            // 여기서그냥 계속 어펜드하고
 
+            count=+1;
+            receiveText.append("total : " + count);
+
+            receiveText.append("\n"+ TextUtil.toCaretString(msg, newline.length() != 0));
+            receiveText.append("\n");
 
             // 파일저장을 밑에다가 저 스트링가지구 하다가
             // 기존파일이있으면 스트림으로 읽으다가 수정
             // 없으면 파일새로생성
+            testTxt += msg;
+            System.out.println(count++);
+            System.out.println(testTxt);
+            System.out.println("------------------------------------------------------------------------------------");
 
-// 받고
+            // 받고
+            Gson gson = new Gson();
+
+            Result result = gson.fromJson(testTxt, Result.class);
+//        System.out.println(result.toString());
+
+            List<List<String>> list = result.getData();
+            System.out.println("LAST DATA : "+list.get(0).toString());
+            long cont = 0;
+//        list << 이건 제이슨배열이들어있는 리스트
+//        list.get(0) << 이것도 list지만 실질적인 제이슨 데이터가 들어있음.
+//        key value로 던졌으면 list가아니라 vo or map이 들어갈수있는 부분임.
+
+            for(List<String> items : list){
+                cont++;
+                for(String item : items){
+                    System.out.print(item.toString() + ", ");
+                }
+                System.out.println();
+                System.out.println("-------------------------");
+                System.out.println("카운트 : " + cont);
+
+            }
         }
+
+        System.out.println("receive end !!");
     }
+
 
     private void status(String str) {
         SpannableStringBuilder spn = new SpannableStringBuilder(str + '\n');
@@ -276,6 +329,7 @@ public class TerminalFragment extends Fragment implements ServiceConnection, Ser
 
     @Override
     public void onSerialRead(byte[] data) {
+        System.out.println("onSerialRead receive호출 직전!!");
         receive(data);
     }
 
@@ -285,4 +339,33 @@ public class TerminalFragment extends Fragment implements ServiceConnection, Ser
         disconnect();
     }
 
+}
+
+class Result{
+    Integer length;
+    List<List<String>> data;
+
+    @Override
+    public String toString() {
+        return "Result{" +
+                "length=" + length +
+                ", data=" + data.size() +
+                '}';
+    }
+
+    public Integer getLength() {
+        return length;
+    }
+
+    public void setLength(Integer length) {
+        this.length = length;
+    }
+
+    public List<List<String>> getData() {
+        return data;
+    }
+
+    public void setData(List<List<String>> data) {
+        this.data = data;
+    }
 }

@@ -34,8 +34,8 @@ public class DevicesFragment extends ListFragment {
         if(getActivity().getPackageManager().hasSystemFeature(PackageManager.FEATURE_BLUETOOTH))
             // 아래어댑터는 잘모르겠고..
             bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
-            // 2. listAdapter 해당 어댑터는 블루투스 목록을 가져오는 어댑터같음
-            // 3. 그래서 해당 어댑터에 블루투스 목록을 가져와 이름, 주소값을 설정해서 액티비티에 그려줌  e.x onActivityCreated
+            // 2. listAdapter 해당 어댑터는 블루투스 목록을 가져오는 어댑터
+            // 3.  해당 어댑터에 블루투스 목록을 가져와 이름, 주소값을 설정해서 액티비티에 그려줌  e.x onActivityCreated
             listAdapter = new ArrayAdapter<BluetoothDevice>(getActivity(), 0, listItems) {
             @NonNull
             @Override
@@ -109,7 +109,7 @@ public class DevicesFragment extends ListFragment {
 
     @Override
     public void onListItemClick(@NonNull ListView l, @NonNull View v, int position, long id) {
-        //5. 리스트 클릭시 발생하는 메소드 여기부터는 아까설명했던곳 각 객체에 이벤트바인딩 되는 부분
+        //5. 리스트 클릭시 발생하는 메소드 여기부터는 각 객체에 이벤트바인딩 되는 부분
         BluetoothDevice device = listItems.get(position-1);
         Bundle args = new Bundle();
         args.putString("device", device.getAddress());
