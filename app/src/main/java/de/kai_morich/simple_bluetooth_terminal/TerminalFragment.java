@@ -263,8 +263,8 @@ public class TerminalFragment extends Fragment implements ServiceConnection, Ser
                 pendingNewline = msg.charAt(msg.length() - 1) == '\n';
             }
 
-            count=+1;
-            receiveText.append("total : " + count);
+//            count=+1;
+//            receiveText.append("total : " + count);
 
             receiveText.append("\n"+ TextUtil.toCaretString(msg, newline.length() != 0));
             receiveText.append("\n");
@@ -275,20 +275,21 @@ public class TerminalFragment extends Fragment implements ServiceConnection, Ser
             // 그러면 해당 데이터가 최초 인입되었을땐 length를 파싱하는로직.
             // 그다음은 data를 파싱하는 로직
             // 저장 ㅇㅇ?
-            System.out.println(msg);
+//            System.out.println(msg);
 
-            String[] a = msg.replace("[", "").replace("]", "").replace("'", "").split(",");
-            for(String i : a){
-                System.out.println( i);
-                //파일저장을하세요 우선.
-            }
+//            String[] a = msg.replace("[", "").replace("]", "").replace("'", "").split(",");
+//            for(String i : a){
+//                System.out.println( i);
+//                //파일저장을하세요 우선.
+//            }
             Gson gson = new Gson();
-//            List<String> list = gson.fromJson(msg, List.class);
+            JsonVo vo = gson.fromJson(msg, JsonVo.class);
 
-//            System.out.println(list.toString());
+            System.out.println(vo.toString());
             System.out.println("----------------------------------------------------------------------------");
         }
 
+        System.out.println(System.currentTimeMillis());
         System.out.println("receive end !!");
     }
 
