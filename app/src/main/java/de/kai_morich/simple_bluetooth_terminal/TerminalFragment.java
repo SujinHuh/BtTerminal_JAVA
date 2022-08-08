@@ -269,37 +269,24 @@ public class TerminalFragment extends Fragment implements ServiceConnection, Ser
             receiveText.append("\n"+ TextUtil.toCaretString(msg, newline.length() != 0));
             receiveText.append("\n");
 
-            // 파일저장을 밑에다가 저 스트링가지구 하다가
-            // 기존파일이있으면 스트림으로 읽으다가 수정
-            // 없으면 파일새로생성
-            testTxt += msg;
-            System.out.println(count++);
-            System.out.println(testTxt);
-            System.out.println("------------------------------------------------------------------------------------");
+            // msg 이제 이객체에 각각의 제이슨형태만 들어오니까
+            // 처음에는 토탈length가 들어오겟지?
+            // 그다음부턴 아래 데이터 제이슨이들어오겠지
+            // 그러면 해당 데이터가 최초 인입되었을땐 length를 파싱하는로직.
+            // 그다음은 data를 파싱하는 로직
+            // 저장 ㅇㅇ?
+            System.out.println(msg);
 
-            // 받고
-            Gson gson = new Gson();
-
-            Result result = gson.fromJson(testTxt, Result.class);
-//        System.out.println(result.toString());
-
-            List<List<String>> list = result.getData();
-            System.out.println("LAST DATA : "+list.get(0).toString());
-            long cont = 0;
-//        list << 이건 제이슨배열이들어있는 리스트
-//        list.get(0) << 이것도 list지만 실질적인 제이슨 데이터가 들어있음.
-//        key value로 던졌으면 list가아니라 vo or map이 들어갈수있는 부분임.
-
-            for(List<String> items : list){
-                cont++;
-                for(String item : items){
-                    System.out.print(item.toString() + ", ");
-                }
-                System.out.println();
-                System.out.println("-------------------------");
-                System.out.println("카운트 : " + cont);
-
+            String[] a = msg.replace("[", "").replace("]", "").replace("'", "").split(",");
+            for(String i : a){
+                System.out.println( i);
+                //파일저장을하세요 우선.
             }
+            Gson gson = new Gson();
+//            List<String> list = gson.fromJson(msg, List.class);
+
+//            System.out.println(list.toString());
+            System.out.println("----------------------------------------------------------------------------");
         }
 
         System.out.println("receive end !!");
