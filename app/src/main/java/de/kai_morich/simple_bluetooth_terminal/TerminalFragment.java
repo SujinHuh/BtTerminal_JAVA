@@ -10,6 +10,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.IBinder;
 import android.text.Editable;
 import android.text.Spannable;
@@ -31,6 +32,11 @@ import androidx.fragment.app.Fragment;
 
 import com.google.gson.Gson;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.List;
 
 public class TerminalFragment extends Fragment implements ServiceConnection, SerialListener {
@@ -81,7 +87,7 @@ public class TerminalFragment extends Fragment implements ServiceConnection, Ser
         if (service != null) {
             System.out.println("onStart true");
             service.attach(this);
-        }else {
+        } else {
             System.out.println("onStart false");
             getActivity().startService(new Intent(getActivity(), SerialService.class)); // prevents service destroy on unbind from recreated activity caused by orientation change
         }
@@ -266,7 +272,7 @@ public class TerminalFragment extends Fragment implements ServiceConnection, Ser
 //            count=+1;
 //            receiveText.append("total : " + count);
 
-            receiveText.append("\n"+ TextUtil.toCaretString(msg, newline.length() != 0));
+            receiveText.append("\n" + TextUtil.toCaretString(msg, newline.length() != 0));
             receiveText.append("\n");
 
             // msg 이제 이객체에 각각의 제이슨형태만 들어오니까
@@ -285,14 +291,43 @@ public class TerminalFragment extends Fragment implements ServiceConnection, Ser
             Gson gson = new Gson();
             JsonVo vo = gson.fromJson(msg, JsonVo.class);
 
+            try {
+                makeCsv(vo);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
+
             System.out.println(vo.toString());
             System.out.println("----------------------------------------------------------------------------");
+
         }
 
         System.out.println(System.currentTimeMillis());
         System.out.println("receive end !!");
     }
 
+    /*
+     csv파일 저장
+     * */
+    public void makeCsv(JsonVo jsonVo) throws Exception {
+        // 경로 지정
+        File csv = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM) + "/file.csv");
+        BufferedWriter bufferedWriter = null;
+        try {
+            bufferedWriter = new BufferedWriter(new FileWriter(csv, true));
+
+            bufferedWriter.write(jsonVo.toString());
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }finally {
+            if(bufferedWriter != null){
+                bufferedWriter.flush();
+                bufferedWriter.close();
+            }
+        }
+    }
 
     private void status(String str) {
         SpannableStringBuilder spn = new SpannableStringBuilder(str + '\n');
@@ -329,7 +364,7 @@ public class TerminalFragment extends Fragment implements ServiceConnection, Ser
 
 }
 
-class Result{
+class Result {
     Integer length;
     List<List<String>> data;
 
