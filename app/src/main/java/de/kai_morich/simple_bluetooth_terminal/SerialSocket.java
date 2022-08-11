@@ -101,12 +101,36 @@ class SerialSocket implements Runnable {
             byte[] buffer = new byte[4096];
             int len;
             //noinspection InfiniteLoopStatement
+            Integer result = null;
+            System.out.println("*******");
+            // 이쪽에
+            int cnt = 0;
+            Integer dataLength = null;
+            Integer resultLength = null;
             while (true) {
+                System.out.println(11111);
+                // 그리고 이거는 최초 한번실행이야.
                 len = socket.getInputStream().read(buffer);
                 byte[] data = Arrays.copyOf(buffer, len);
-                if(listener != null) {
+                if (listener != null) {
                     System.out.println(44);
                     listener.onSerialRead(data);
+//                    resultLength = listener.onSerialRead(data);
+//                    if(resultLength != null){   // 처음인입했을때만 시작
+////                        while 문은 계속반복될거야 왜ㅣ냐 true로 잡고있으니까
+////                        그렇기에 우리가 최초실행잡을수있는건 파이썬에서 넘겨준 length로 판단가능.
+//                        dataLength = resultLength;
+//                    }
+//
+//                    System.out.println("resultLength >>> " + resultLength);
+//
+//                    if(dataLength != null){
+//                        if( dataLength == ++cnt){
+//    //                        계속돌다가 결국에 데이터랭쓰까지다돌면 찍힐곳
+//                            System.out.println("데이터 while 완료");
+//                        }
+//                    }
+
                 }
             }
         } catch (Exception e) {
@@ -118,6 +142,9 @@ class SerialSocket implements Runnable {
             } catch (Exception ignored) {
             }
             socket = null;
+            e.printStackTrace();
+        }finally {
+            System.out.println(2222);
         }
     }
 

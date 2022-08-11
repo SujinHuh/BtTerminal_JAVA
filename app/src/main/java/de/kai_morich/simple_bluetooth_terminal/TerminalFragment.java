@@ -250,7 +250,8 @@ public class TerminalFragment extends Fragment implements ServiceConnection, Ser
         }
     }
 
-    private void receive(byte[] data) {
+    private Integer receive(byte[] data) {
+        JsonVo vo = new JsonVo();
         System.out.println("receive start !!");
         //7. 최종 데이터 받는 ,데이터 바이트 스트링 치환후, 제이슨 파싱,
         if (hexEnabled) {
@@ -289,7 +290,7 @@ public class TerminalFragment extends Fragment implements ServiceConnection, Ser
 //                //파일저장을하세요 우선.
 //            }
             Gson gson = new Gson();
-            JsonVo vo = gson.fromJson(msg, JsonVo.class);
+            vo = gson.fromJson(msg, JsonVo.class);
 
             try {
                 makeCsv(vo);
@@ -305,6 +306,7 @@ public class TerminalFragment extends Fragment implements ServiceConnection, Ser
 
         System.out.println(System.currentTimeMillis());
         System.out.println("receive end !!");
+        return vo.getLength();
     }
 
     /*
@@ -318,7 +320,7 @@ public class TerminalFragment extends Fragment implements ServiceConnection, Ser
             bufferedWriter = new BufferedWriter(new FileWriter(csv, true));
 
             bufferedWriter.write(jsonVo.toString());
-
+            bufferedWriter.newLine();
         } catch (Exception e) {
             e.printStackTrace();
         }finally {
@@ -351,9 +353,9 @@ public class TerminalFragment extends Fragment implements ServiceConnection, Ser
     }
 
     @Override
-    public void onSerialRead(byte[] data) {
+    public Integer onSerialRead(byte[] data) {
         System.out.println("onSerialRead receive호출 직전!!");
-        receive(data);
+        return receive(data);
     }
 
     @Override
