@@ -37,6 +37,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.Date;
 import java.util.List;
 
 public class TerminalFragment extends Fragment implements ServiceConnection, SerialListener {
@@ -61,6 +62,9 @@ public class TerminalFragment extends Fragment implements ServiceConnection, Ser
      */
     static long count = 0;
     static String testTxt = "";
+    String sendMsg = "";
+    String sendMsgDate = "";
+    Date fileDate;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -229,22 +233,26 @@ public class TerminalFragment extends Fragment implements ServiceConnection, Ser
             return;
         }
         try {
-            String msg;
+
             byte[] data;
             if (hexEnabled) {
                 StringBuilder sb = new StringBuilder();
                 TextUtil.toHexString(sb, TextUtil.fromHexString(str));
                 TextUtil.toHexString(sb, newline.getBytes());
-                msg = sb.toString();
-                data = TextUtil.fromHexString(msg);
+                sendMsg = sb.toString();
+                data = TextUtil.fromHexString(sendMsg);
             } else {
-                msg = str;
+                sendMsg = str;
                 data = (str + newline).getBytes();
             }
-            SpannableStringBuilder spn = new SpannableStringBuilder(msg + '\n');
+            SpannableStringBuilder spn = new SpannableStringBuilder(sendMsg + '\n');
             spn.setSpan(new ForegroundColorSpan(getResources().getColor(R.color.colorSendText)), 0, spn.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
             receiveText.append(spn);
             service.write(data);
+            sendMsgDate = sendMsg;
+            // 경로 지정
+            Date date = new Date(); // 객체생성을 makeCsv할때마다 가져오니까 시간이 달라질수있다.
+            fileDate = date;
         } catch (Exception e) {
             onSerialIoError(e);
         }
@@ -313,8 +321,9 @@ public class TerminalFragment extends Fragment implements ServiceConnection, Ser
      csv파일 저장
      * */
     public void makeCsv(JsonVo jsonVo) throws Exception {
-        // 경로 지정
-        File csv = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM) + "/file.csv");
+        // 그리고 아래 경로같은경우는...... DCIM/이렇게고 그ㄹ렇기에맞는거는 이게맞다
+//        File csv = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM) + sendMsgDate + date.getTime()+"/.csv");
+        File csv = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM) + "/" + sendMsgDate + fileDate.getTime()+".csv");
         BufferedWriter bufferedWriter = null;
         try {
             bufferedWriter = new BufferedWriter(new FileWriter(csv, true));
@@ -323,8 +332,8 @@ public class TerminalFragment extends Fragment implements ServiceConnection, Ser
             bufferedWriter.newLine();
         } catch (Exception e) {
             e.printStackTrace();
-        }finally {
-            if(bufferedWriter != null){
+        } finally {
+            if (bufferedWriter != null) {
                 bufferedWriter.flush();
                 bufferedWriter.close();
             }
