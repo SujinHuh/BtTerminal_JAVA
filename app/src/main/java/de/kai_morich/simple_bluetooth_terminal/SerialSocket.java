@@ -119,8 +119,9 @@ class SerialSocket implements Runnable {
                 byte[] data = Arrays.copyOf(buffer, len);
                 if (listener != null) {
                     System.out.println(44);
+                    listener.onSerialRead(data);
 //                    여기가 실질적인 데이터를 넘기는 곳이니까..
-//                    그렇다면 여기에 매개변수를 늘려서 전달전달전달 해서 fileName용용                    listener.onSerialRead(data);
+//                    그렇다면 여기에 매개변수를 늘려서 전달전달전달 해서 fileName용용
 //                    resultLength = listener.onSerialRead(data);
 //                    if(resultLength != null){   // 처음인입했을때만 시작
 ////                        while 문은 계속반복될거야 왜ㅣ냐 true로 잡고있으니까
