@@ -63,6 +63,10 @@ public class JsonVo{
 
     @Override
     public String toString() {
+
+        if( length != null){
+            return "length : " + length;
+        }
         return "JsonVo{" +
                 "length=" + length +
                 ", SensorID='" + SensorID + '\'' +
