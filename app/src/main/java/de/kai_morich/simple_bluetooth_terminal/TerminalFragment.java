@@ -255,7 +255,7 @@ public class TerminalFragment extends Fragment implements ServiceConnection, Ser
             // 경로 지정
             Date date = new Date(); // 객체생성을 makeCsv할때마다 가져오니까 시간이 달라질수있다.
             fileDate = date;
-            SimpleDateFormat sdf = new SimpleDateFormat("YYYY-MM-DD hh:mm:ss");
+            SimpleDateFormat sdf = new SimpleDateFormat("YYYY-MM-dd hh:mm:ss");
             sysDate = sdf.format(date);
         } catch (Exception e) {
             onSerialIoError(e);
@@ -318,6 +318,8 @@ public class TerminalFragment extends Fragment implements ServiceConnection, Ser
 
         System.out.println(System.currentTimeMillis());
         System.out.println("receive end !!");
+        //ms팝업을 띄우는
+
         return vo.getLength();
     }
 

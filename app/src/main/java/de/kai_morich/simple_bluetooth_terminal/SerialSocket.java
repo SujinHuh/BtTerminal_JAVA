@@ -114,12 +114,22 @@ class SerialSocket implements Runnable {
             // 나는 그래서
             Date date = new Date();
             while (true) {
+                cnt++;
                 System.out.println(11111);
                 len = socket.getInputStream().read(buffer);
                 byte[] data = Arrays.copyOf(buffer, len);
                 if (listener != null) {
                     System.out.println(44);
-                    listener.onSerialRead(data);
+                    dataLength = listener.onSerialRead(data);
+                    System.out.println("dataLength >>> " + dataLength);
+//                    if(dataLength != null){
+//                        resultLength = dataLength;
+//                    }
+//                    cnt++;
+//
+//                    if( resultLength == cnt ){
+//                        System.out.println("파일받기 종료.");
+//                    }
 //                    여기가 실질적인 데이터를 넘기는 곳이니까..
 //                    그렇다면 여기에 매개변수를 늘려서 전달전달전달 해서 fileName용용
 //                    resultLength = listener.onSerialRead(data);
